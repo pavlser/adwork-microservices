@@ -1,0 +1,16 @@
+spring:
+  application:
+     name: users-service-application
+
+server:
+  port: 8090
+  servlet.context-path: /api/users
+
+# server.error.whitelabel.enabled: false
+# error.path: /error
+
+security:
+  jwt:
+    token:
+      secret-key: ed896105-816e-4321-b2b5-d9fd5dfb2c48
+      expire-length: 36000
