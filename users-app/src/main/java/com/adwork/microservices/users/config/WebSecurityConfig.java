@@ -5,16 +5,17 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.BeanIds;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.adwork.microservices.users.jwt.JwtTokenProvider;
+
 @Configuration
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
@@ -29,41 +30,18 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
 
-        http.csrf().disable(); // actually don't need for restfull services
+    	http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); // don't need sessions
 
-        // No session will be created or used by spring security
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+    	http.csrf().disable(); // no sessions -> no cookies forgery
+    	
+    	http
+	        .authorizeRequests()
+	        .antMatchers("/api/auth/**")
+	        	.permitAll()
+	        .anyRequest()
+	        	.authenticated();
 
-        // Entry points
-        http.authorizeRequests()//
-                .antMatchers("/users/signin").permitAll()//
-                .antMatchers("/users/signup").permitAll()//
-                .antMatchers("/h2-console/**/**").permitAll()
-                // Disallow everything else..
-                .anyRequest().authenticated();
-
-        // If a user try to access a resource without having enough permissions
-        http.exceptionHandling().accessDeniedPage("/login");
-
-        // Apply JWT
-        http.apply(new JwtTokenFilterConfigurer(jwtTokenProvider));
-    }
-
-    @Override
-    public void configure(WebSecurity web) throws Exception {
-        // Allow swagger to be accessed without authentication
-        web.ignoring().antMatchers("/v2/api-docs")//
-                .antMatchers("/swagger-resources/**")//
-                .antMatchers("/swagger-ui.html")//
-                .antMatchers("/configuration/**")//
-                .antMatchers("/webjars/**")//
-                .antMatchers("/public")
-
-                // Un-secure H2 Database (for testing purposes, H2 console shouldn't be unprotected in production)
-                .and()
-                .ignoring()
-                .antMatchers("/h2-console/**/**");
-        ;
+        //http.apply(new JwtTokenFilterConfigurer(jwtTokenProvider));
     }
 
     @Bean

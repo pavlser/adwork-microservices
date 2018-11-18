@@ -18,11 +18,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
 
-@Configuration
-@EnableSwagger2
+//@Configuration
+//@EnableSwagger2
 public class SwaggerConfig {
 
-    @Bean
+    //@Bean
     public Docket api() {
         return new Docket(DocumentationType.SWAGGER_2)
             .select()

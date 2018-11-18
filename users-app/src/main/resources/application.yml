@@ -1,13 +1,13 @@
 spring:
   application:
-     name: users-service-application
+    name: users-service-application
 
 server:
   port: 8090
-  servlet.context-path: /api/users
 
 # server.error.whitelabel.enabled: false
 # error.path: /error
+server.error.whitelabel.enabled: false
 
 security:
   jwt:

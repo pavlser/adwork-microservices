@@ -22,9 +22,9 @@ public class UserAppConfig {
     CommandLineRunner initDatabase(IUserService service) {
         return args -> {
             if (service.countUsers() == 0) {
-                service.addUser(new UserAccount("admin@adwork-ms.com", "*", UserRole.ADMIN));
-                service.addUser(new UserAccount("user1@adwork-ms.com", "*", UserRole.USER));
-                service.addUser(new UserAccount("manager1@adwork-ms.com", "*", UserRole.MANAGER));
+                service.addUser(new UserAccount("admin@adwork-microservices.com", "admin", UserRole.ADMIN));
+                service.addUser(new UserAccount("user1@adwork-microservices.com", "user1", UserRole.USER));
+                service.addUser(new UserAccount("manager1@adwork-microservices.com", "manager1", UserRole.MANAGER));
                 System.out.println("Users created:\n" + service.listUsers());
             }
         };

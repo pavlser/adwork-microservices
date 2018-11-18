@@ -14,11 +14,11 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 @RunWith(SpringRunner.class)
-@DataJpaTest
+//@DataJpaTest
 public class UserServiceTest {
 
-    @Autowired
-    //private IUserService service;
+    //@Autowired
+	private IUserService service;
 
     @Test
     public void add_user_test() {

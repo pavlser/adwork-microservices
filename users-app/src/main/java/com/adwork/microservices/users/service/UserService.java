@@ -1,7 +1,7 @@
 package com.adwork.microservices.users.service;
 
-import com.adwork.microservices.users.config.JwtTokenProvider;
 import com.adwork.microservices.users.entity.UserAccount;
+import com.adwork.microservices.users.jwt.JwtTokenProvider;
 import com.adwork.microservices.users.service.exception.UserNotFoundException;
 import com.adwork.microservices.users.service.exception.UserServiceException;
 import org.springframework.beans.factory.annotation.Autowired;

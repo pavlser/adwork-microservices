@@ -1,5 +1,6 @@
-package com.adwork.microservices.users.config;
+package com.adwork.microservices.users.jwt;
 
+import com.adwork.microservices.users.config.MyUserDetails;
 import com.adwork.microservices.users.entity.UserRole;
 import com.adwork.microservices.users.service.exception.UserServiceException;
 import io.jsonwebtoken.Claims;
