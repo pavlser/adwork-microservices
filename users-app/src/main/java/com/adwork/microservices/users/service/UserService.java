@@ -1,20 +1,19 @@
 package com.adwork.microservices.users.service;
 
+import java.util.Date;
+import java.util.List;
+
+import javax.transaction.Transactional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
+
+import com.adwork.microservices.users.dto.AuthData;
 import com.adwork.microservices.users.entity.UserAccount;
 import com.adwork.microservices.users.jwt.JwtTokenProvider;
 import com.adwork.microservices.users.service.exception.UserNotFoundException;
 import com.adwork.microservices.users.service.exception.UserServiceException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-
-import javax.transaction.Transactional;
-import java.util.Date;
-import java.util.List;
 
 @Service
 public class UserService implements IUserService {
@@ -23,13 +22,7 @@ public class UserService implements IUserService {
 	private UsersRepository repository;
 
 	@Autowired
-	private PasswordEncoder passwordEncoder;
-
-	@Autowired
 	private JwtTokenProvider jwtTokenProvider;
-
-	@Autowired
-	private AuthenticationManager authenticationManager;
 
 	@Override
 	public List<UserAccount> listUsers() {
@@ -73,10 +66,10 @@ public class UserService implements IUserService {
 	}
 
 	@Transactional 
-	public String authenticate(String email, String password) {
-		UserAccount user = repository.findByEmail(email);
-		if (user != null && user.getPassword().equals(password)) {
-			return jwtTokenProvider.createToken(email, user.getRoles());
+	public String authenticate(AuthData auth) {
+		UserAccount user = repository.findByEmail(auth.email);
+		if (user != null && user.getPassword().equals(auth.password)) {
+			return jwtTokenProvider.createToken(user.getEmail(), user.getRoles(), auth.referer);
 		} else {
 			throw new UserServiceException("Invalid username or password", HttpStatus.UNPROCESSABLE_ENTITY);
 		}

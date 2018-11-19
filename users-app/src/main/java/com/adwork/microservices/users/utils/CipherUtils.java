@@ -1,5 +1,6 @@
 package com.adwork.microservices.users.utils;
 
+import java.security.Key;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.Signature;
@@ -9,9 +10,29 @@ import javax.crypto.Cipher;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 
-// Credits: https://gist.github.com/nielsutrecht/855f3bef0cf559d8d23e94e2aecd4ede
-
 public class CipherUtils {
+	
+	public static String decodeBase64AndDecrypt(String base64String, Key key) throws Exception {
+		return decrypt(decodeBase64(base64String), key);
+	}
+	
+	public static byte[] decodeBase64(String base64String) {
+		return Base64.getDecoder().decode(base64String);
+	}
+	
+	public static String decrypt(String text, Key key) throws Exception {
+		return decrypt(text.getBytes(), key);
+	}
+	
+	public static String decrypt(byte[] bytes, Key key) throws Exception {
+		return new String(cipherEngine(key, Cipher.DECRYPT_MODE).doFinal(bytes));
+	}
+	
+	private static Cipher cipherEngine(Key key, int mode) throws Exception {
+		Cipher engine = Cipher.getInstance(key.getAlgorithm());
+		engine.init(mode, key);
+		return engine;
+	}
 
 	public static String encrypt(String plainText, PublicKey publicKey) throws Exception {
 		Cipher encryptCipher = Cipher.getInstance("RSA");
@@ -20,12 +41,7 @@ public class CipherUtils {
 		return Base64.getEncoder().encodeToString(cipherText);
 	}
 
-	public static String decrypt(String cipherText, PrivateKey privateKey) throws Exception {
-		byte[] bytes = Base64.getDecoder().decode(cipherText);
-		Cipher decriptCipher = Cipher.getInstance("RSA");
-		decriptCipher.init(Cipher.DECRYPT_MODE, privateKey);
-		return new String(decriptCipher.doFinal(bytes), UTF_8);
-	}
+	
 
 	public static String sign(String plainText, PrivateKey privateKey) throws Exception {
 		Signature privateSignature = Signature.getInstance("SHA256withRSA");

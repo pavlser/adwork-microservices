@@ -12,8 +12,9 @@ import javax.crypto.Cipher;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import com.adwork.microservices.users.dto.AuthInfo;
+import com.adwork.microservices.users.dto.AuthData;
 import com.adwork.microservices.users.service.KeysService.PublicKeyInfo;
+import com.adwork.microservices.users.utils.CipherUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class AuthTest {
@@ -28,7 +29,7 @@ public class AuthTest {
 			System.out.println("Server public key:\n" + key + "\n");
 			
 			// Create auth info
-			AuthInfo auth = new AuthInfo("admin@adwork-microservices.com", "admin");
+			AuthData auth = new AuthData("admin@adwork-microservices.com", "admin");
 			ObjectMapper mapper = new ObjectMapper();
 			String authStr = mapper.writeValueAsString(auth);
 			
@@ -48,7 +49,13 @@ public class AuthTest {
 	        // Post auth
 			ResponseEntity<String> authResp = restTemplate.postForEntity(
 					HostUrl + "/api/auth/create-token?kid="+key.keyId, encodedAuth, String.class);
-			System.out.println("\nToken:\n" + authResp.getBody());
+			String token = authResp.getBody();
+			System.out.println("\nToken:\n" + token + "\n");
+			
+			String[] parts = token.split("\\.");
+			for (int i=0; i<parts.length-1; i++) {
+				System.out.println(new String(CipherUtils.decodeBase64(parts[i])));
+			}
 			
 		} catch (Exception ex) {
 			ex.printStackTrace();
