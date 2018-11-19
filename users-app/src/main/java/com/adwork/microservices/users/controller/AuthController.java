@@ -2,9 +2,7 @@ package com.adwork.microservices.users.controller;
 
 import java.util.Base64;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,12 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.adwork.microservices.users.dto.AuthInfo;
 import com.adwork.microservices.users.service.KeysService;
+import com.adwork.microservices.users.service.KeysService.KeyInfo;
 import com.adwork.microservices.users.service.KeysService.PublicKeyInfo;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.lang.Assert;
-
-import com.adwork.microservices.users.service.KeysService.KeyInfo;
 
 @RestController
 @RequestMapping("/api/auth")

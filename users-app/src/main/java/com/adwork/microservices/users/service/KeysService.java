@@ -94,7 +94,7 @@ public class KeysService {
 	public static class PublicKeyInfo {
 		public String keyId;
 		public String publicKey;
-		public String algorithm = "RSA";
+		public String algorithm;
 		public long createdDate;
 		public long validUntilDate;
 		
@@ -109,8 +109,11 @@ public class KeysService {
 
 		@Override
 		public String toString() {
-			return "PublicKeyInfo [keyId=" + keyId + ", publicKey=" + publicKey + ", createdDate=" + createdDate
-					+ ", validUntilDate=" + validUntilDate + "]";
+			return "PublicKeyInfo [keyId=" + keyId 
+					+ ", publicKey=" + publicKey 
+					+ ", createdDate=" + createdDate
+					+ ", validUntilDate=" + validUntilDate 
+					+ ", algorithm=" + algorithm + "]";
 		}
 		
 	}

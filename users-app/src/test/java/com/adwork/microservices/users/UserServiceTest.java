@@ -1,4 +1,4 @@
-package users;
+package com.adwork.microservices.users;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
