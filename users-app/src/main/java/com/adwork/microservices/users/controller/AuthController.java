@@ -16,6 +16,7 @@ import com.adwork.microservices.users.dto.AuthInfo;
 import com.adwork.microservices.users.service.KeysService;
 import com.adwork.microservices.users.service.KeysService.KeyInfo;
 import com.adwork.microservices.users.service.KeysService.PublicKeyInfo;
+import com.adwork.microservices.users.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.jsonwebtoken.lang.Assert;
@@ -27,12 +28,15 @@ public class AuthController {
 	@Autowired
 	KeysService keysService;
 	
+	@Autowired
+	UserService userService;
+	
 	ObjectMapper mapper = new ObjectMapper();
 
 	@PostMapping("create-token")
 	String createToken(@RequestParam("kid") String kid, @RequestBody String auth) {
 		System.out.println("AuthController.createToken(): auth=" + auth);
-
+		String token = null;
 		try {
 			KeyInfo ki = keysService.getKeyInfo(kid);
 			Assert.notNull(ki);
@@ -45,10 +49,12 @@ public class AuthController {
 			AuthInfo authInfo = mapper.readValue(decryptedStr, AuthInfo.class);
 			
 			System.out.println("authInfo: " + authInfo.email + ", " + authInfo.password);
+			
+			token = userService.authenticate(authInfo.email, authInfo.password);
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
-		return "{\"message\":\"ok\"}";
+		return token;
 	}
 
 	@GetMapping("validate-token")

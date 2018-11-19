@@ -1,9 +1,9 @@
 package com.adwork.microservices.users.service;
 
-import com.adwork.microservices.users.entity.UserAccount;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.Repository;
+
+import com.adwork.microservices.users.entity.UserAccount;
 
 public interface UsersRepository extends JpaRepository<UserAccount, Long> {
 

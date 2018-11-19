@@ -54,12 +54,8 @@ public class KeysService {
 		return info;
 	}
 	
-	public byte[] getPublicKey() {
-		return keys.get(lastKeyId).keyPair.getPublic().getEncoded();
-	}
-	
-	public byte[] getPrivateKey() {
-		return keys.get(lastKeyId).keyPair.getPrivate().getEncoded();
+	public KeyInfo getCurrentKey() {
+		return keys.get(lastKeyId);
 	}
 	
 	private KeyInfo getNewKeyInfo() {

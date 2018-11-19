@@ -48,7 +48,7 @@ public class AuthTest {
 	        // Post auth
 			ResponseEntity<String> authResp = restTemplate.postForEntity(
 					HostUrl + "/api/auth/create-token?kid="+key.keyId, encodedAuth, String.class);
-			System.out.println(authResp);
+			System.out.println("\nToken:\n" + authResp.getBody());
 			
 		} catch (Exception ex) {
 			ex.printStackTrace();

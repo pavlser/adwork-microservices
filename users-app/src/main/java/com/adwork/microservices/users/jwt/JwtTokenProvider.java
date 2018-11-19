@@ -1,86 +1,82 @@
 package com.adwork.microservices.users.jwt;
 
-import com.adwork.microservices.users.config.MyUserDetails;
-import com.adwork.microservices.users.entity.UserRole;
-import com.adwork.microservices.users.service.exception.UserServiceException;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
-import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.stereotype.Component;
+
+import com.adwork.microservices.users.entity.UserRole;
+import com.adwork.microservices.users.service.KeysService;
+import com.adwork.microservices.users.service.KeysService.KeyInfo;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+
 @Component
 public class JwtTokenProvider {
 
-    @Value("${security.jwt.token.secret-key:secret-key}")
-    private String secretKey;
+	@Value("${security.jwt.token.expire-length:3600000}")
+	private long tokenValidityMs = 3600000; // 1 hour
 
-    @Value("${security.jwt.token.expire-length:3600000}")
-    private long validityInMilliseconds = 3600000; //1 hour
+	//@Autowired
+	//private MyUserDetails myUserDetails;
+	
+	@Autowired
+	KeysService keysService;
 
-    @Autowired
-    private MyUserDetails myUserDetails;
+	public String createToken(String email, List<UserRole> roles) {
+		KeyInfo key = keysService.getCurrentKey();
+		return Jwts.builder()
+				.setClaims(claims(email, roles))
+				.setIssuedAt(time(0))
+				.setExpiration(time(tokenValidityMs))
+				.setHeaderParam("kid", key.keyId)
+				.signWith(SignatureAlgorithm.RS512, key.keyPair.getPrivate())
+				.compact();
+	}
+	
+	private Claims claims(String email, List<UserRole> roles) {
+		Claims claims = Jwts.claims().setSubject(email);
+		claims.put("roles", roles.stream().map(s -> s.toString()).filter(Objects::nonNull)
+				.collect(Collectors.toList()));
+		return claims;
+	}
+	
+	private Date time(long shift) {
+		return new Date(new Date().getTime() + shift);
+	}
+/*
+	public Authentication getAuthentication(String token) {
+		UserDetails userDetails = myUserDetails.loadUserByUsername(getUsername(token));
+		return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+	}
 
-    @PostConstruct
-    protected void init() {
-        secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
-    }
+	public String getUsername(String token) {
+		return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
+	}
 
-    public String createToken(String username, List<UserRole> roles) {
+	public String resolveToken(HttpServletRequest req) {
+		String bearerToken = req.getHeader("Authorization");
+		if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+			return bearerToken.substring(7, bearerToken.length());
+		}
+		return null;
+	}
 
-        Claims claims = Jwts.claims().setSubject(username);
-        claims.put("auth", roles.stream().map(s -> new SimpleGrantedAuthority(s.toString())).filter(Objects::nonNull).collect(Collectors.toList()));
-
-        Date now = new Date();
-        Date validity = new Date(now.getTime() + validityInMilliseconds);
-
-        return Jwts.builder()//
-                .setClaims(claims)//
-                .setIssuedAt(now)//
-                .setExpiration(validity)//
-                .signWith(SignatureAlgorithm.HS256, secretKey)//
-                .compact();
-    }
-
-    public Authentication getAuthentication(String token) {
-        UserDetails userDetails = myUserDetails.loadUserByUsername(getUsername(token));
-        return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
-    }
-
-    public String getUsername(String token) {
-        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
-    }
-
-    public String resolveToken(HttpServletRequest req) {
-        String bearerToken = req.getHeader("Authorization");
-        if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7, bearerToken.length());
-        }
-        return null;
-    }
-
-    public boolean validateToken(String token) {
-        try {
-            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
-            return true;
-        } catch (JwtException | IllegalArgumentException e) {
-            throw new UserServiceException("Expired or invalid JWT token", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
+	public boolean validateToken(String token) {
+		try {
+			Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+			return true;
+		} catch (JwtException | IllegalArgumentException e) {
+			throw new UserServiceException("Expired or invalid JWT token", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+*/
 }
