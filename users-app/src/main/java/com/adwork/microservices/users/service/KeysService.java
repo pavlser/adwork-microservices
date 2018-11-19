@@ -11,7 +11,6 @@ import javax.annotation.PostConstruct;
 
 import org.springframework.stereotype.Component;
 
-import io.jsonwebtoken.impl.TextCodec;
 import io.jsonwebtoken.impl.crypto.RsaProvider;
 
 @Component

@@ -35,14 +35,11 @@ public class AuthcontrollerMockMvcTest {
 	
 	@Test
 	public void shouldReturnPublicKey() throws Exception {
-		PublicKeyInfo key = keysService.getPublicKeyInfo();
-		
 		MvcResult result = this.mockMvc.perform(get("/api/auth/public-key"))
 			.andDo(print())
 			.andExpect(status().isOk())
-			.andExpect(content().string(containsString("publicKey")))
 			.andExpect(content().string(containsString("keyId")))
-			.andExpect(jsonPath("$.publicKey").value(key.publicKey))
+			.andExpect(jsonPath("$.publicKey").isNotEmpty())
 			.andReturn();
 
 		PublicKeyInfo pubkey = getPublicKeyInfo(result);
