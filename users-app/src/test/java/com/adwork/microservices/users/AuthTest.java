@@ -69,8 +69,6 @@ public class AuthTest {
 					HostUrl + "/api/auth/validate-token", HttpMethod.GET, tokenEntity, String.class).getBody();
 			System.out.println("\nToken is valid:\n" + tokenValid + "\n");
 			
-			Thread.sleep(10000);//1542723393 1542723394 1542723464 1542723454
-			
 			// Refresh token
 			String newToken = restTemplate.exchange(
 					HostUrl + "/api/auth/refresh-token", HttpMethod.GET, tokenEntity, String.class).getBody();

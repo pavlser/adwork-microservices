@@ -9,11 +9,15 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.assertj.core.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
-import com.adwork.microservices.users.entity.UserRole;
 import com.adwork.microservices.users.service.KeysService;
 import com.adwork.microservices.users.service.KeysService.PublicKeyInfo.PrivateKeyInfo;
 
@@ -36,10 +40,10 @@ public class JwtTokenProvider {
 	@Autowired
 	KeysService keysService;
 
-	public String createToken(String email, List<UserRole> roles, String verifyUrl) {
+	public String createToken(String email, Object[] roles, String verifyUrl) {
 		PrivateKeyInfo key = keysService.getCurrentPrivateKey();
 		return Jwts.builder()
-				.setClaims(claims(email, roles))
+				.setClaims(claims(email, Arrays.asList(roles)))
 				.setIssuedAt(time(0))
 				.setIssuer(applicationName)
 				.setExpiration(time(tokenValidityMs))
@@ -49,10 +53,10 @@ public class JwtTokenProvider {
 				.compact();
 	}
 
-	private Claims claims(String email, List<UserRole> roles) {
+	private Claims claims(String email, List<Object> roles) {
 		Claims claims = Jwts.claims().setSubject(email);
-		claims.put("roles",roles.stream()
-				.map(s -> s.toString())
+		claims.put("roles", roles.stream()
+				.map(r -> r.toString())
 				.filter(Objects::nonNull)
 				.collect(Collectors.toList()));
 		return claims;
@@ -90,12 +94,34 @@ public class JwtTokenProvider {
 		return result;
 	}
 	
+	public Authentication getAuthentication(String token) {
+		return new UsernamePasswordAuthenticationToken(getSubject(token), null, getAuthorities(token));
+	}
+	
 	public String getSubject(String token) {
 		return Jwts.parser()
 				.setSigningKeyResolver(signingKeyResolver)
 				.parseClaimsJws(token)
 				.getBody()
 				.getSubject();
+	}
+	
+	@SuppressWarnings({ "unchecked" })
+	public List<String> getRoles(String token) {
+		Claims claims = Jwts.parser()
+				.setSigningKeyResolver(signingKeyResolver)
+				.parseClaimsJws(token)
+				.getBody();
+		 List<String> roles = claims.get("roles", ArrayList.class);
+		 return roles;
+	}
+	
+	public List<GrantedAuthority> getAuthorities(String token) {
+		List<GrantedAuthority> authorities = new ArrayList<>();
+		getRoles(token).stream()
+			.map(role -> new SimpleGrantedAuthority(role.toString()))
+			.forEach(authorities::add);
+		return authorities;
 	}
 	
 	private SigningKeyResolver signingKeyResolver = new SigningKeyResolverAdapter() {
@@ -117,19 +143,5 @@ public class JwtTokenProvider {
 	private boolean userHasRoles(String email, List<String> roles) {
 		return true; //TODO: check user roles
 	}
-
-	/*
-	 * public Authentication getAuthentication(String token) { UserDetails
-	 * userDetails = myUserDetails.loadUserByUsername(getUsername(token)); return
-	 * new UsernamePasswordAuthenticationToken(userDetails, "",
-	 * userDetails.getAuthorities()); }
-	 * 
-	 * public String getUsername(String token) { return
-	 * Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().
-	 * getSubject(); }
-	 * 
-	 * 
-	 * 
-	 * 
-	 */
+	 
 }

@@ -1,14 +1,18 @@
 package com.adwork.microservices.users.controller;
 
+import java.util.List;
+
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.adwork.microservices.users.auth.UsersAuthenticationProvider;
 import com.adwork.microservices.users.dto.AuthData;
 import com.adwork.microservices.users.jwt.JwtTokenProvider;
 import com.adwork.microservices.users.service.KeysService;
@@ -31,6 +35,9 @@ public class AuthController {
 	@Autowired
 	JwtTokenProvider jwtTokenProvider;
 	
+	@Autowired
+	UsersAuthenticationProvider authProvider;
+	
 	ObjectMapper mapper = new ObjectMapper();
 	
 	@GetMapping("public-key")
@@ -41,7 +48,8 @@ public class AuthController {
 	@PostMapping("create-token")
 	String createToken(@RequestBody String auth, HttpServletRequest request) throws Exception {
 		AuthData authData = mapper.readValue(CipherUtils.decodeBase64AndDecrypt(auth, privateKey().key), AuthData.class);
-		return userService.authenticateByEmail(authData.email, getVerifyUrl(request));
+		Authentication authentication = authProvider.authenticate(authData.email, authData.password);
+		return jwtTokenProvider.createToken(authentication.getName(), authentication.getAuthorities().toArray(), getVerifyUrl(request));
 	}
 
 	@GetMapping("validate-token")
@@ -57,7 +65,8 @@ public class AuthController {
 		boolean valid = jwtTokenProvider.validateToken(token);
 		if (valid) {
 			String email = jwtTokenProvider.getSubject(token);
-			newToken = userService.authenticateByEmail(email, getVerifyUrl(request));
+			List<String> roles = jwtTokenProvider.getRoles(token);
+			newToken = jwtTokenProvider.createToken(email, roles.toArray(), getVerifyUrl(request));
 		}
 		return newToken;
 	}

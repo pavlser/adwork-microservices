@@ -6,22 +6,16 @@ import java.util.List;
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import com.adwork.microservices.users.entity.UserAccount;
-import com.adwork.microservices.users.jwt.JwtTokenProvider;
 import com.adwork.microservices.users.service.exception.UserNotFoundException;
-import com.adwork.microservices.users.service.exception.UserServiceException;
 
 @Service
 public class UserService implements IUserService {
 
 	@Autowired
 	private UsersRepository repository;
-
-	@Autowired
-	private JwtTokenProvider jwtTokenProvider;
 
 	@Override
 	public List<UserAccount> listUsers() {
@@ -32,6 +26,11 @@ public class UserService implements IUserService {
 	public UserAccount getUser(Long id) {
 		UserAccount user = repository.findById(id).orElseThrow(() -> new UserNotFoundException(id));
 		return user;
+	}
+	
+	public UserAccount getUserByEmailAndPassword(String email, String password) {
+		UserAccount user = repository.findByEmail(email);
+		return user.getPassword().equals(password) ? user : null;
 	}
 
 	@Override
@@ -64,15 +63,6 @@ public class UserService implements IUserService {
 		return repository.usersCount();
 	}
 
-	@Transactional 
-	public String authenticateByEmail(String email, String referer) {
-		UserAccount user = repository.findByEmail(email);
-		if (user != null) {
-			return jwtTokenProvider.createToken(user.getEmail(), user.getRoles(), referer);
-		} else {
-			throw new UserServiceException("Invalid username or password", HttpStatus.UNPROCESSABLE_ENTITY);
-		}
-	}
 
 	/*
 	 * @Transactional public String register(UserAccount user) { if
