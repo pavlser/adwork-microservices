@@ -1,4 +1,4 @@
-package com.adwork.microservices.users.jwt;
+package com.adwork.microservices.users.auth.jwt;
 
 import java.io.IOException;
 
@@ -16,7 +16,7 @@ import org.springframework.web.filter.GenericFilterBean;
 import com.adwork.microservices.users.service.exception.UserServiceException;
 
 public class JwtTokenFilter extends GenericFilterBean {
-	
+
 	private JwtTokenProvider jwtTokenProvider;
 
 	public JwtTokenFilter(JwtTokenProvider jwtTokenProvider) {

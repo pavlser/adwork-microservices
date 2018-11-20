@@ -87,6 +87,12 @@ public class AuthTest {
 					HostUrl + "/api/auth/show-token", HttpMethod.GET, tokenEntity, String.class).getBody();
 			System.out.println("\nNew token details:\n" + newTokenDetails + "\n");
 			
+			
+			// Load all users with token auth
+			String allUsers = restTemplate.exchange(
+					HostUrl + "/api/users/all", HttpMethod.GET, tokenEntity, String.class).getBody();
+			System.out.println("\nAll users:\n " + allUsers + "\n");
+			
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}

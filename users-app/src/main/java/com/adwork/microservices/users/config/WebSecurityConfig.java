@@ -10,10 +10,11 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.adwork.microservices.users.auth.UsersAuthenticationProvider;
-import com.adwork.microservices.users.jwt.JwtTokenFilterConfigurer;
-import com.adwork.microservices.users.jwt.JwtTokenProvider;
+import com.adwork.microservices.users.auth.jwt.JwtTokenFilter;
+import com.adwork.microservices.users.auth.jwt.JwtTokenProvider;
 
 @Configuration
 @EnableWebSecurity
@@ -24,6 +25,11 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Autowired
 	JwtTokenProvider jwtTokenProvider;
+	
+	@Bean
+    public JwtTokenFilter jwtTokenFilter() {
+        return new JwtTokenFilter(jwtTokenProvider);
+    }
 
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -35,7 +41,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); // don't need sessions with JWT
 		http.csrf().disable(); // no sessions -> no cookies forgery
 		http.authorizeRequests().antMatchers("/api/auth/**").permitAll().anyRequest().authenticated();
-		http.apply(new JwtTokenFilterConfigurer(jwtTokenProvider));
+		//http.apply(new JwtTokenFilterConfigurer(jwtTokenProvider));
+		http.addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 	}
 
 	@Bean

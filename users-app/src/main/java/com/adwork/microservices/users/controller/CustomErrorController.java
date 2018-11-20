@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.context.request.WebRequest;
 
 @Controller
 public class CustomErrorController implements ErrorController {
@@ -29,8 +30,7 @@ public class CustomErrorController implements ErrorController {
 	@RequestMapping("/error")
 	@ResponseBody
 	public String handleError(HttpServletRequest req) {
-		// do something like logging
-		return "Error: " + errorAttributes;
+		return "Error: " + errorAttributes.getError((WebRequest)req);
 	}
 
 	/*

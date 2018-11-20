@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.adwork.microservices.users.auth.UsersAuthenticationProvider;
+import com.adwork.microservices.users.auth.jwt.JwtTokenProvider;
 import com.adwork.microservices.users.dto.AuthData;
-import com.adwork.microservices.users.jwt.JwtTokenProvider;
 import com.adwork.microservices.users.service.KeysService;
 import com.adwork.microservices.users.service.KeysService.PublicKeyInfo;
 import com.adwork.microservices.users.service.KeysService.PublicKeyInfo.PrivateKeyInfo;
@@ -73,7 +73,6 @@ public class AuthController {
 	
 	@GetMapping("show-token")
 	String showToken(HttpServletRequest request) {
-		System.out.println("AuthController.showToken() 1");
 		String token = jwtTokenProvider.extractToken(request);
 		if (token != null) {
 			String[] parts = token.split("\\.");
