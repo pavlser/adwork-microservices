@@ -19,13 +19,6 @@ import com.adwork.microservices.users.jwt.JwtTokenProvider;
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
-	/*
-	 * @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
-	 * 
-	 * @Override public AuthenticationManager authenticationManagerBean() throws
-	 * Exception { return super.authenticationManagerBean(); }
-	 */
-
 	@Autowired
 	UsersAuthenticationProvider authProvider;
 
