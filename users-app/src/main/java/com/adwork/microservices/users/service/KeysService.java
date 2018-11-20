@@ -1,5 +1,6 @@
 package com.adwork.microservices.users.service;
 
+import java.security.Key;
 import java.security.KeyPair;
 import java.util.Base64;
 import java.util.Date;
@@ -10,6 +11,8 @@ import java.util.UUID;
 import javax.annotation.PostConstruct;
 
 import org.springframework.stereotype.Component;
+
+import com.adwork.microservices.users.service.KeysService.PublicKeyInfo.PrivateKeyInfo;
 
 import io.jsonwebtoken.impl.crypto.RsaProvider;
 
@@ -56,6 +59,11 @@ public class KeysService {
 	
 	public KeyInfo getCurrentKey() {
 		return keys.get(lastKeyId);
+	}
+	
+	public PrivateKeyInfo getCurrentPrivateKey() {
+		KeyInfo ki = keys.get(lastKeyId);
+		return new PrivateKeyInfo(lastKeyId, ki.keyPair.getPrivate());
 	}
 	
 	private KeyInfo getNewKeyInfo() {
@@ -109,6 +117,16 @@ public class KeysService {
 					+ ", createdDate=" + createdDate
 					+ ", validUntilDate=" + validUntilDate 
 					+ ", algorithm=" + algorithm + "]";
+		}
+		
+		public static class PrivateKeyInfo {
+			public String keyId;
+			public Key key;
+			
+			public PrivateKeyInfo(String kid, Key key) {
+				this.keyId = kid;
+				this.key = key;
+			}
 		}
 		
 	}

@@ -9,12 +9,14 @@ import java.util.Base64;
 
 import javax.crypto.Cipher;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
 import com.adwork.microservices.users.dto.AuthData;
 import com.adwork.microservices.users.service.KeysService.PublicKeyInfo;
-import com.adwork.microservices.users.utils.CipherUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class AuthTest {
@@ -48,14 +50,44 @@ public class AuthTest {
 	        
 	        // Post auth
 			ResponseEntity<String> authResp = restTemplate.postForEntity(
-					HostUrl + "/api/auth/create-token?kid="+key.keyId, encodedAuth, String.class);
+					HostUrl + "/api/auth/create-token", encodedAuth, String.class);
 			String token = authResp.getBody();
 			System.out.println("\nToken:\n" + token + "\n");
 			
-			String[] parts = token.split("\\.");
-			for (int i=0; i<parts.length-1; i++) {
-				System.out.println(new String(CipherUtils.decodeBase64(parts[i])));
-			}
+			// Create authentication header
+			HttpHeaders headers = new HttpHeaders();
+			headers.setBearerAuth(token);
+			HttpEntity<String> tokenEntity = new HttpEntity<>(null, headers);
+			
+			// Show token details
+			String tokenDetails = restTemplate.exchange(
+					HostUrl + "/api/auth/show-token", HttpMethod.GET, tokenEntity, String.class).getBody();
+			System.out.println("\nParsed token:\n" + tokenDetails + "\n");
+			
+			// Validate token
+			String tokenValid = restTemplate.exchange(
+					HostUrl + "/api/auth/validate-token", HttpMethod.GET, tokenEntity, String.class).getBody();
+			System.out.println("\nToken is valid:\n" + tokenValid + "\n");
+			
+			Thread.sleep(10000);//1542723393 1542723394 1542723464 1542723454
+			
+			// Refresh token
+			String newToken = restTemplate.exchange(
+					HostUrl + "/api/auth/refresh-token", HttpMethod.GET, tokenEntity, String.class).getBody();
+			System.out.println("\nNew token:\n" + newToken + "\n");
+			
+			// Validate new token
+			headers = new HttpHeaders();
+			headers.setBearerAuth(newToken);
+			tokenEntity = new HttpEntity<>(null, headers);
+			String newTokenValid = restTemplate.exchange(
+					HostUrl + "/api/auth/validate-token", HttpMethod.GET, tokenEntity, String.class).getBody();
+			System.out.println("\nNew token is valid:\n" + newTokenValid + "\n");
+			
+			// Show new token details
+			String newTokenDetails = restTemplate.exchange(
+					HostUrl + "/api/auth/show-token", HttpMethod.GET, tokenEntity, String.class).getBody();
+			System.out.println("\nNew token details:\n" + newTokenDetails + "\n");
 			
 		} catch (Exception ex) {
 			ex.printStackTrace();

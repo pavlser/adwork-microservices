@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import com.adwork.microservices.users.dto.AuthData;
 import com.adwork.microservices.users.entity.UserAccount;
 import com.adwork.microservices.users.jwt.JwtTokenProvider;
 import com.adwork.microservices.users.service.exception.UserNotFoundException;
@@ -66,10 +65,10 @@ public class UserService implements IUserService {
 	}
 
 	@Transactional 
-	public String authenticate(AuthData auth) {
-		UserAccount user = repository.findByEmail(auth.email);
-		if (user != null && user.getPassword().equals(auth.password)) {
-			return jwtTokenProvider.createToken(user.getEmail(), user.getRoles(), auth.referer);
+	public String authenticateByEmail(String email, String referer) {
+		UserAccount user = repository.findByEmail(email);
+		if (user != null) {
+			return jwtTokenProvider.createToken(user.getEmail(), user.getRoles(), referer);
 		} else {
 			throw new UserServiceException("Invalid username or password", HttpStatus.UNPROCESSABLE_ENTITY);
 		}
