@@ -41,7 +41,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS); // don't need sessions with JWT
 		http.csrf().disable(); // no sessions -> no cookies forgery
 		http.authorizeRequests().antMatchers("/api/auth/**").permitAll().anyRequest().authenticated();
-		//http.apply(new JwtTokenFilterConfigurer(jwtTokenProvider));
 		http.addFilterBefore(jwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 	}
 

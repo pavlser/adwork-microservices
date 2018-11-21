@@ -1,8 +1,10 @@
 package com.adwork.microservices.users.controller;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,64 +23,54 @@ import com.adwork.microservices.users.service.IUserService;
 @RequestMapping("/api/users")
 public class UsersController {
 
-    IUserService service;
+	IUserService service;
 
-    public UsersController(IUserService service) {
-        this.service = service;
-    }
+	public UsersController(IUserService service) {
+		this.service = service;
+	}
 
-    @GetMapping("{id}")
-    public UserDto one(@PathVariable("id") Long userId) {
-        return toDto(service.getUser(userId));
-    }
+	@GetMapping("{id}")
+	//@PreAuthorize("#username == authentication.principal.username") public String getMyRoles(String username) {
+	public UserDto one(@PathVariable("id") Long userId) {
+		return toDto(service.getUser(userId));
+	}
 
-    @RequestMapping(path="all", method=RequestMethod.GET)
-    public List<UserDto> all() {
-        /* Resources<Resource<UserDto>> listUsers() {
-        List<Resource<UserDto>> usersList = service.listUsers().stream()
-                .map(userAccount -> new Resource<>(
-                        toUserDto(userAccount),
-                        linkTo(methodOn(UsersController.class).getUserById(userAccount.getId())).withSelfRel(),
-                        linkTo(methodOn(UsersController.class).listUsers()).withRel("users")))
-                .collect(Collectors.toList());
+	@RequestMapping(path = "all", method = RequestMethod.GET)
+	@PreAuthorize("hasPermission(principal, 'ADMIN') or hasPermission(principal, 'MANAGER')")
+	public List<UserDto> all(Principal principal) {
+		return service.listUsers().stream()
+			.map(userAccount -> toDto(userAccount))
+			.collect(Collectors.toList());
+	}
 
-        return new Resources<>(usersList,
-                linkTo(methodOn(UsersController.class).listUsers()).withSelfRel());*/
+	@PostMapping
+	@PreAuthorize("hasPermission(principal, 'ADMIN')")
+	public UserDto add(@RequestBody UserDto user) {
+		UserAccount account = new UserAccount();
+		account.setEmail(user.email);
+		account.setRole(user.role);
+		account.setLocked(user.locked);
+		return toDto(service.addUser(account));
+	}
 
-        return service.listUsers().stream()
-                .map(userAccount -> toDto(userAccount))
-                .collect(Collectors.toList());
-    }
+	@DeleteMapping("{id}")
+	@PreAuthorize("hasPermission(principal, 'ADMIN')")
+	public boolean delete(@PathVariable("id") Long userId) {
+		return service.deleteUser(userId) != null;
+	}
 
-    @PostMapping
-    public UserDto add(@RequestBody UserDto user) {
-        UserAccount account = new UserAccount();
-        account.setEmail(user.email);
-        account.setRole(user.role);
-        account.setLocked(user.locked);
-        return toDto(service.addUser(account));
-    }
+	@PutMapping
+	@PreAuthorize("hasPermission(principal, 'ADMIN') or hasPermission(principal, 'MANAGER')")
+	public UserDto update(@RequestBody UserDto user) {
+		UserAccount account = service.getUser(user.id);
+		account.setEmail(user.email);
+		account.setRole(user.role);
+		account.setLocked(user.locked);
+		return toDto(service.updateUser(account));
+	}
 
-    @DeleteMapping("{id}")
-    public boolean delete(@PathVariable("id") Long userId) {
-        return service.deleteUser(userId) != null;
-    }
-
-    @PutMapping
-    public UserDto update(@RequestBody UserDto user) {
-        UserAccount account = service.getUser(user.id);
-        account.setEmail(user.email);
-        account.setRole(user.role);
-        account.setLocked(user.locked);
-        return toDto(service.updateUser(account));
-    }
-
-    private UserDto toDto(UserAccount acc) {
-        return new UserDto(
-                acc.getId(),
-                acc.getEmail(),
-                acc.getRole(),
-                acc.isLocked());
-    }
+	private UserDto toDto(UserAccount acc) {
+		return new UserDto(acc.getId(), acc.getEmail(), acc.getRole(), acc.isLocked());
+	}
 
 }

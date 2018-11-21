@@ -43,22 +43,22 @@ public class JwtTokenProvider {
 	public String createToken(String email, Object[] roles, String verifyUrl) {
 		PrivateKeyInfo key = keysService.getCurrentPrivateKey();
 		return Jwts.builder()
-				.setClaims(claims(email, Arrays.asList(roles)))
-				.setIssuedAt(time(0))
-				.setIssuer(applicationName)
-				.setExpiration(time(tokenValidityMs))
-				.setHeaderParam("kid", key.keyId)
-				.setHeaderParam("url", verifyUrl)
-				.signWith(SignatureAlgorithm.RS512, key.key)
-				.compact();
+			.setClaims(claims(email, Arrays.asList(roles)))
+			.setIssuedAt(time(0))
+			.setIssuer(applicationName)
+			.setExpiration(time(tokenValidityMs))
+			.setHeaderParam("kid", key.keyId)
+			.setHeaderParam("url", verifyUrl)
+			.signWith(SignatureAlgorithm.RS512, key.key)
+			.compact();
 	}
 
 	private Claims claims(String email, List<Object> roles) {
 		Claims claims = Jwts.claims().setSubject(email);
 		claims.put("roles", roles.stream()
-				.map(r -> r.toString())
-				.filter(Objects::nonNull)
-				.collect(Collectors.toList()));
+			.map(r -> r.toString())
+			.filter(Objects::nonNull)
+			.collect(Collectors.toList()));
 		return claims;
 	}
 
@@ -76,22 +76,10 @@ public class JwtTokenProvider {
 	}
 
 	public boolean validateToken(String token) {
-		boolean result = false;
-		try {
-			Claims claims = Jwts.parser()
-				.setSigningKeyResolver(signingKeyResolver)
-				.parseClaimsJws(token)
-				.getBody();
-			System.out.println(" > subject: " + claims.getSubject() + ", roles: " + claims.get("roles", ArrayList.class));
-			String issuer = claims.getIssuer();
-			String email = claims.getSubject();
-			@SuppressWarnings("unchecked")
-			ArrayList<String> roles = claims.get("roles", ArrayList.class);
-			result = issuedByMe(issuer) && userHasRoles(email, roles);
-		} catch (Exception ex) {
-			System.out.println("Token validation error:" + ex);
-		}
-		return result;
+		Jwts.parser()
+			.setSigningKeyResolver(signingKeyResolver)
+			.parseClaimsJws(token);
+		return true;
 	}
 	
 	public Authentication getAuthentication(String token) {
@@ -100,18 +88,18 @@ public class JwtTokenProvider {
 	
 	public String getSubject(String token) {
 		return Jwts.parser()
-				.setSigningKeyResolver(signingKeyResolver)
-				.parseClaimsJws(token)
-				.getBody()
-				.getSubject();
+			.setSigningKeyResolver(signingKeyResolver)
+			.parseClaimsJws(token)
+			.getBody()
+			.getSubject();
 	}
 	
 	@SuppressWarnings({ "unchecked" })
 	public List<String> getRoles(String token) {
 		Claims claims = Jwts.parser()
-				.setSigningKeyResolver(signingKeyResolver)
-				.parseClaimsJws(token)
-				.getBody();
+			.setSigningKeyResolver(signingKeyResolver)
+			.parseClaimsJws(token)
+			.getBody();
 		 List<String> roles = claims.get("roles", ArrayList.class);
 		 return roles;
 	}
@@ -134,14 +122,6 @@ public class JwtTokenProvider {
 	
 	private Key publicKey(String keyId) {
 		return keysService.getKeyInfo(keyId).keyPair.getPublic();
-	}
-	
-	private boolean issuedByMe(String issuer) {
-		return applicationName.equals(issuer);
-	}
-	
-	private boolean userHasRoles(String email, List<String> roles) {
-		return true; //TODO: check user roles
 	}
 	 
 }
