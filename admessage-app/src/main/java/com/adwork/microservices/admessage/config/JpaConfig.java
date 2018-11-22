@@ -5,13 +5,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @Configuration
-@EnableJpaRepositories
-@EnableJpaAuditing//(auditorAwareRef = "auditorAware")
+@EnableJpaRepositories("com.adwork.microservices.admessage")
+@EnableJpaAuditing
 public class JpaConfig {
-	
-	/*@Bean
-	public AuditorAware<String> auditorAware() {
-		return new AuditorAwareImpl();
-	}*/
 	
 }
