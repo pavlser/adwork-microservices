@@ -34,7 +34,7 @@ public class AdmessagesController {
 	
 	@GetMapping("{id}")
 	public AdMessageDto one(@PathVariable("id") Long id) {
-		return toDto(repo.findById(id).orElseThrow(() -> new AdMessagesException("Ad not found")));
+		return toDto(repo.findById(id).orElseThrow(() -> AdMessagesException.AdNotFound));
 	}
 	
 	@PostMapping
@@ -48,13 +48,13 @@ public class AdmessagesController {
 			entity.setTitle(dto.title);
 			entity.setBody(dto.body);
 			return repo.save(entity);
-		}).orElseThrow(() -> new AdMessagesException("Ad not found"));
+		}).orElseThrow(() -> AdMessagesException.AdNotFound);
 		return toDto(updatedEntity);
 	}
 	
 	@DeleteMapping("{id}")
 	public boolean delete(@PathVariable("id") Long id) {
-		AdmessageEntity entity = repo.findById(id).orElseThrow(() -> new AdMessagesException("Ad not found"));
+		AdmessageEntity entity = repo.findById(id).orElseThrow(() -> AdMessagesException.AdNotFound);
 		repo.delete(entity);
 		return true;
 	}

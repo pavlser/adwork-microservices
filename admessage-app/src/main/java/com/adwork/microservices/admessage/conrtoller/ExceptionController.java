@@ -14,7 +14,7 @@ public class ExceptionController extends ResponseEntityExceptionHandler {
 
 	@ExceptionHandler(AdMessagesException.class)
 	public final ResponseEntity<String> handleAdMessagesException(AdMessagesException ex, WebRequest request) {
-	  return getResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
+	  return getResponse(ex.getMessage(), ex.getCode());
 	}
 	
 	@ExceptionHandler(Exception.class)
