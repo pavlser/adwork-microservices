@@ -1,12 +1,12 @@
-package com.adwork.microservices.users;
+package com.adwork.microservices.admessage;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class UsersApplication {
+public class AdmessagesApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(UsersApplication.class, args);
+		SpringApplication.run(AdmessagesApplication.class, args);
 	}
 }
