@@ -1,4 +1,4 @@
-# adwork-microservices
+# Adwork Microservices demo application
 
 Modules:
 * AdMessage application - allows user posting ad messages
